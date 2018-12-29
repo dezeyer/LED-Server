@@ -1,7 +1,7 @@
 import json
 
-from rgbUtils import effectControllerJsonHandler
-from rgbUtils import rgbStripControllerJsonHandler
+from rgbUtils import effectControllerJsonHelper
+from rgbUtils import rgbStripControllerJsonHelper
 from webserver.SimpleWebSocketServer import WebSocket
 
 import traceback
@@ -52,9 +52,9 @@ class HTTPWebSocketsHandler(WebSocket):
                 elif int(data['register_client_type']) is CLIENT_TYPE_RECORDER:
                     self.client_type = CLIENT_TYPE_RECORDER
 
-            # controller responses are handled by the effectControllerJsonHandler
+            # controller responses are handled by the effectControllerJsonHelper
             if self.client_type is CLIENT_TYPE_CONTROLLER:
-                response = effectControllerJsonHandler.responseHandler(self.effectController, self.rgbStripController, data)
+                response = effectControllerJsonHelper.responseHandler(self.effectController, self.rgbStripController, data)
                 self.sendMessage(
                     json.dumps({
                         'response': response
@@ -95,9 +95,9 @@ class HTTPWebSocketsHandler(WebSocket):
         if self.client_type is CLIENT_TYPE_CONTROLLER:
             self.sendMessage(
                 json.dumps({
-                    'effects': effectControllerJsonHandler.getEffects(self.effectController),
-                    'rgbStrips': rgbStripControllerJsonHandler.getRGBStrips(self.rgbStripController),
-                    'effectThreads': effectControllerJsonHandler.getEffectThreads(self.effectController)
+                    'effects': effectControllerJsonHelper.getEffects(self.effectController),
+                    'rgbStrips': rgbStripControllerJsonHelper.getRGBStrips(self.rgbStripController),
+                    'effectThreads': effectControllerJsonHelper.getEffectThreads(self.effectController)
                 })
             )
             return
@@ -110,6 +110,6 @@ class HTTPWebSocketsHandler(WebSocket):
     def onRGBStripValueUpdate(self,rgbStrip):
         self.sendMessage(
             json.dumps({
-                'data': rgbStripControllerJsonHandler.getRGBData(rgbStrip)
+                'data': rgbStripControllerJsonHelper.getRGBData(rgbStrip)
             })
         )

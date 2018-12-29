@@ -6,9 +6,6 @@ from time import sleep, time
 import json
 import struct
 
-from rgbUtils import effectControllerJsonHandler
-from rgbUtils import rgbStripControllerJsonHandler
-
 class ThreadedUDPServer(threading.Thread):
     def __init__(self,effectController,rgbStripController):
         threading.Thread.__init__(self)

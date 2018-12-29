@@ -1,11 +1,10 @@
+"""
+Convert the rgbStripController function outputs to json format
+"""
+
+# get the color values of a single led in json format
 def getRGBData(rgbStrip,led = 0):
-    result = {}
-    data = rgbStrip.getData()
-    red = data[0]
-    green = data[1]
-    blue = data[2]
-    result[led] = {'led': led, 'red': red[led], 'green': green[led], 'blue': blue[led]}
-    return result
+    return {'led': led, 'red': rgbStrip.getData()[0][led], 'green': rgbStrip.getData()[1][led], 'blue': rgbStrip.getData()[2][led]}
 
 # return json of all configured rgbStrips
 def getRGBStrips(rgbStripController):
