@@ -1,0 +1,429 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="utf-8">
+    <title>LED-Server :: KJ-intern</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="css/font-awesome.min.css">
+    <!-- Bootstrap core CSS -->
+    <link href="css/bootstrap.min.css" rel="stylesheet">
+    <!-- Material Design Bootstrap -->
+    <link href="css/mdb.min.css" rel="stylesheet">
+    <!-- Your custom styles (optional) -->
+    <link href="css/style.css" rel="stylesheet">
+    <link href="css/wheelcolorpicker.css" rel="stylesheet">
+
+    <link href="css/jquery.minicolors.css" rel="stylesheet">
+
+    <!-- HTML5 shim and Respond.js IE8 support of HTML5 elements and media queries -->
+    <!--[if lt IE 9]>
+    <script src="js/html5shiv.js"></script>
+    <script src="js/respond.min.js"></script>
+    <![endif]-->
+    <style>
+        .text-nowrap {
+            white-space: nowrap;
+        }
+
+        .dimmScreen
+        {
+            position:fixed;
+            padding:0;
+            margin:0;
+
+            top:0;
+            left:0;
+
+            width: 100%;
+            height: 100%;
+            background:rgba(0, 0, 0, 0.5);
+        }
+    </style>
+</head>
+<body  ng-app="LED-WebFrontend" ng-controller="LED-ServerCtrl" >
+    <div style="height: 100vh">
+        <div class="container">
+            <!-- Not Connected -->
+            <div class="row dimmScreen ng-show justify-content-center" ng-hide="connected">
+                <div class=" col-md-6 ">
+                    <div class="row">
+                        <div class="col-12 mt-3" >
+                            <div class="card "  >            
+                                <!-- Card content -->
+                                <div class="card-body justify-content-center">
+                                    <!-- Title -->
+                                    <h4 class="card-title infinite animated headShake text-center"><strong>Verbindung wird hergestellt...</strong></h4>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="row ng-hide" ng-show="connected">
+                <!--Left Col-->
+                <div class="col-md-6 mt-3">
+                    <div class="row">
+                        <div class="col-12 mt-3" >
+                            <div class="card "  >            
+                                <!-- Card content -->
+                                <div class="card-body ">
+                                    <!-- Title -->
+                                    <h4 class="card-title"><strong>Neuen Effekt starten</strong></h4>
+                                    <form id="startNewEffectThread">
+                                        <div class="row">
+                                            <div class="col-12">
+                                                <div class="form-group row">
+                                                    <label for="newEffectThread" class="col-sm-3 col-form-label"> Select Effect: </label><br>
+                                                    <select ng-change="newEffectThread.params=[]" name="newEffectThread" class="form-control col-sm-7 "  id="newEffectThread" ng-model="newEffectThread.effect" ng-options="effect.index as effect.name for effect in effects" ></select>
+                                                </div>
+                                                <div class="newEffectThreadDesc">{{effects[newEffectThread.effect].desc}}</div>
+
+                                            </div>
+                                            <div class="col-12" ng-repeat="effectParam in effects[newEffectThread.effect].effectParams">
+
+                                                <input ng-if="effectParam.type=='colorpicker'"
+                                                    minicolors="colorpickerconfig"
+                                                    class="form-control"
+                                                    type="text"
+                                                    ng-init="
+                                                        newEffectThreadParamColorPicker[effectParam.index]=rgbToHex(
+                                                            effectParam.options[0][2],
+                                                            effectParam.options[1][2],
+                                                            effectParam.options[2][2]
+                                                        );
+                                                        newEffectThread.params[effectParam.index] = {};
+                                                        newEffectThread.params[effectParam.index][0] = hexToRgb(newEffectThreadParamColorPicker[effectParam.index]).r;
+                                                        newEffectThread.params[effectParam.index][1] = hexToRgb(newEffectThreadParamColorPicker[effectParam.index]).g;
+                                                        newEffectThread.params[effectParam.index][2] = hexToRgb(newEffectThreadParamColorPicker[effectParam.index]).b
+                                                    "
+                                                    ng-change="
+                                                        newEffectThread.params[effectParam.index][0] = hexToRgb(newEffectThreadParamColorPicker[effectParam.index]).r;
+                                                        newEffectThread.params[effectParam.index][1] = hexToRgb(newEffectThreadParamColorPicker[effectParam.index]).g;
+                                                        newEffectThread.params[effectParam.index][2] = hexToRgb(newEffectThreadParamColorPicker[effectParam.index]).b"
+                                                    ng-model="newEffectThreadParamColorPicker[effectParam.index]"
+                                                    >
+
+                                                <mdb-range-input ng-if="effectParam.type=='slider'"
+                                                    default="true" 
+                                                    id="range" 
+                                                    min="{{effectParam.options[0][0]}}"
+                                                    ng-value="effectParam.options[0][2]"
+                                                    ng-model="newEffectThread.params[effectParam.index][0]"
+                                                    max="{{effectParam.options[0][1]}}">
+                                                </mdb-range-input>
+                                                    
+                                                {{effectParam}}
+                                            </div>
+                                        </div>
+                                        <div class="row">
+                                            <div class="col-7 mt-3">
+                                                <div class="row">
+                                                    <div class="col" ng-repeat="rgbStrip in rgbStrips">
+                                                        <!-- Material unchecked -->
+                                                        <div class="form-check" >
+                                                            <input type="checkbox" class="form-check-input" id="newEffectThreadRGBStrips{{rgbStrip.index}}" name="newEffectThreadRGBStrips[]" ng-model="newEffectThread.rgbStrips[rgbStrip.index]"/>
+                                                            <label class="form-check-label text-nowrap" for="newEffectThreadRGBStrips{{rgbStrip.index}}">{{rgbStrip.name}}</label>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="col-5 mt-3">
+                                                <!-- Provides extra visual weight and identifies the primary action in a set of buttons --> 
+                                                <a href="#" ng-click="startEffect(newEffectThread.effect,newEffectThread.rgbStrips,newEffectThread.params)" class="btn btn-primary float-right">Anwenden</a>
+                                            </div>
+                                        </div>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                        <!--Debug!-->
+                        <div class="col-12 mt-3" ng-show="false">
+                            <div class="card "  >            
+                                <!-- Card content -->
+                                <div class="card-body ">
+                                    <pre>{{rgbStrips | json}}{{effects | json}}{{effectThreads | json}}{{newEffectThread | json}}</pre>
+                                    
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <!--/Left Col-->
+                <!--Right Col-->
+                <div class="col-md-6 mt-3">
+                    <div class="row" >
+                        <form name="moveRGBStripToEffectThreadForm">
+                            <div class="col-md-12 mt-3" ng-repeat="effectThread in effectThreads" >
+                                <div class="card" >            
+                                    <!-- Card content -->
+                                    <div class="card-body ">
+                                
+                                        <!-- Title -->
+                                        <h4 class="card-title"><strong>{{ effectThread.name }}</strong></h4>
+                                        <!-- Text -->
+                                        <p class="card-text">{{ effectThread.desc }}</p>
+                                        <div class="row">
+                                            <div class="col-12" ng-repeat="effectParam in effectThread.effectParams">
+                                                <input ng-if="effectParam.type=='colorpicker'"
+                                                    minicolors="colorpickerconfig"
+                                                    class="form-control"
+                                                    type="text"
+                                                    ng-init="
+                                                        effectThreadParamColorPicker[effectThread.index][effectParam.index]=rgbToHex(
+                                                            effectParam.values[0],
+                                                            effectParam.values[1],
+                                                            effectParam.values[2]
+                                                        );
+                                                        effectThreadParamColorPicker[effectThread.index].params[effectParam.index] = {};
+                                                        effectThreadParamColorPicker[effectThread.index].params[effectParam.index][0] = hexToRgb(effectThreadParamColorPicker[effectThread.index][effectParam.index]).r;
+                                                        effectThreadParamColorPicker[effectThread.index].params[effectParam.index][1] = hexToRgb(effectThreadParamColorPicker[effectThread.index][effectParam.index]).g;
+                                                        effectThreadParamColorPicker[effectThread.index].params[effectParam.index][2] = hexToRgb(effectThreadParamColorPicker[effectThread.index][effectParam.index]).b
+                                                    "
+                                                    ng-change="
+                                                        effectThreadParamColorPicker[effectThread.index].params[effectParam.index][0] = hexToRgb(effectThreadParamColorPicker[effectThread.index][effectParam.index]).r;
+                                                        effectThreadParamColorPicker[effectThread.index].params[effectParam.index][1] = hexToRgb(effectThreadParamColorPicker[effectThread.index][effectParam.index]).g;
+                                                        effectThreadParamColorPicker[effectThread.index].params[effectParam.index][2] = hexToRgb(effectThreadParamColorPicker[effectThread.index][effectParam.index]).b;
+                                                        effectThreadChangeEffectParam(effectThread.index,effectThreadParamColorPicker[effectThread.index].params)
+                                                    "
+
+                                                    ng-model="effectThreadParamColorPicker[effectThread.index][effectParam.index]"
+                                                    >
+                                                    {{effectParam.values}}
+
+                                                <!--
+                                                <input ng-if="effectParam.type=='colorpicker'"
+                                                    minicolors="colorpickerconfig"
+                                                    id="color-input"
+                                                    class="form-control"
+                                                    type="text"
+                                                    ng-init="effectThreadParamColorPicker[effectThread.index][effectParam.index]=rgbToHex(effectParam.values[0][2],effectParam.values[1][2],effectParam.values[2][2]);"
+                                                    ng-change="effectThreadChangeEffectParam(effectThread.index,{0: {0: hexToRgb(effectThreadParamColorPicker[effectThread.index][effectParam.index]).r,1: hexToRgb(effectThreadParamColorPicker[effectThread.index][effectParam.index]).g, 2: hexToRgb(effectThreadParamColorPicker[effectThread.index][effectParam.index]).b}})"
+                                                    ng-model="effectThreadParamColorPicker[effectThread.index][effectParam.index]"
+                                                    >-->
+                                            </div>
+                                        </div>
+                                        <div class="row">
+                                            <div class="col" ng-repeat="rgbStrip in rgbStrips">
+                                                <!-- Material unchecked -->
+                                                <div class="form-check" >
+                                                        <input type="radio" ng-checked="isRGBStripActive(rgbStrip,effectThread.activeRGBStips)" ng-change="moveRGBStripToEffectThread(rgbStrip.index,effectThread.index)" class="form-check-input" id="{{ effectThread.name }}EffectThreadRGBStrip{{rgbStrip.index}}" ng-model="moveRGBStripToEffectThreadModel[rgbStrip.index]" name="{{rgbStrip.index}}" value="{{effect.index}}">
+                                                        <label class="form-check-label text-nowrap" for="{{ effectThread.name }}EffectThreadRGBStrip{{rgbStrip.index}}">{{rgbStrip.name}}</label>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <p class="card-text">{{effectThread.dump}}</p>
+                                    </div>
+                                </div>   
+                            </div>
+                        </form>
+                    </div>
+                </div>
+                <!--/Right Col-->
+            </div>
+        </div>
+    </div>
+    
+    <!-- SCRIPTS -->
+    <!-- JQuery -->
+    <script type="text/javascript" src="js/jquery-3.3.1.min.js"></script>
+    <script type="text/javascript" src="js/jquery.wheelcolorpicker-3.0.5.min.js"></script>
+    <script type="text/javascript" src="js/jquery.minicolors.min.js"></script>
+    <!-- Bootstrap tooltips -->
+    <script type="text/javascript" src="js/popper.min.js"></script>
+    <!-- Bootstrap core JavaScript -->
+    <script type="text/javascript" src="js/bootstrap.min.js"></script>
+    <!-- MDB core JavaScript -->
+    <script type="text/javascript" src="js/mdb.min.js"></script>
+    <script src="js/angularjs.js"></script>
+    <script type="text/javascript" src="js/angular-minicolors.js"></script>
+    <script src="js/reconnecting-websocket.js"></script>
+    <script>
+        var app = angular.module('LED-WebFrontend',['minicolors']);
+        app.factory('socket', [function() {
+            var stack = [];
+            var onmessageDefer;
+            var host = "localhost"
+            if (window.location.hostname != ""){
+                host = window.location.hostname
+            }
+            var socket = {
+                ws: new ReconnectingWebSocket("ws://"+host+":8001", null, {debug: false, reconnectInterval: 2000}),
+                send: function(data) {
+                    if (socket.ws.readyState == 1) {
+                        socket.ws.send(data);
+                    } else {
+                        stack.push(data);
+                    }
+                },
+                onmessage: function(callback) {
+                    if (socket.ws.readyState == 1) {
+                        socket.ws.onmessage = callback;
+                    } else {
+                        onmessageDefer = callback;
+                    }
+                }
+            };
+            socket.ws.onopen = function(event) {
+                for (i in stack) {
+                    socket.ws.send(stack[i]);
+                }
+                stack = [];
+                if (onmessageDefer) {
+                    socket.ws.onmessage = onmessageDefer;
+                    onmessageDefer = null;
+                }
+            };
+            return socket;
+        }]);
+
+        app.controller('LED-ServerCtrl', ['$scope',  'socket', function($scope, socket) { 
+
+            $scope.connected = false;
+
+            $scope.rgbStrips = {};
+            $scope.effects = {};
+            $scope.effectThreads = {};
+            
+            $scope.newEffectThreadParamColorPicker = {}
+            $scope.newEffectThread = {}
+            $scope.newEffectThread.params = {};
+            $scope.newEffectThread.rgbStrips = {};
+
+
+            $scope.colorpickerconfig = {
+                // control: 'saturation',
+                control: 'hue',
+                // control: 'brightness',
+                // control: 'wheel',
+                theme: 'bootstrap',
+                inline: true,
+                position: 'top left'
+            };
+
+            socket.ws.addEventListener('close',function(event) { 
+                $scope.$apply(function(){
+                    $scope.connected = false
+                }); 
+            });
+            socket.ws.addEventListener('open',function(event) { 
+                $scope.$apply(function(){
+                    socket.send(
+                        JSON.stringify({ 
+                            'register_client_type': 0
+                        })
+                    );
+                    $scope.connected = true
+                }); 
+            });
+           
+            socket.onmessage(function(event) {
+                $scope.$apply(function(){
+                    json = JSON.parse(event.data)
+                    console.log("Message: ",json)
+                    //remove strips from startEffect that may not exist anymore
+                    if(json.hasOwnProperty('rgbStrips')){
+                        jQuery.each($scope.newEffectThread.rgbStrips,function(key,value){
+                            if (!(key in json.rgbStrips)){
+                                delete $scope.newEffectThread.rgbStrips[key];
+                            }
+                        });
+
+                    }
+                    if(json.hasOwnProperty('effects') && json.hasOwnProperty('rgbStrips')){
+                        //$("#startNewEffectThread")[0].reset();
+                        //$("#newEffectThread").removeAttr("selected");
+
+                        //$scope.effects = {}
+                        $scope.effects = json.effects
+                        //$scope.rgbStrips = {}
+                        $scope.rgbStrips = json.rgbStrips
+                    }
+                    if(json.hasOwnProperty('effectThreads')){
+                        $scope.effectThreads = {}
+                        $scope.effectThreads = json.effectThreads
+                        $scope.moveRGBStripToEffectThreadModel = {}
+
+                        $scope.moveRGBStripToEffectThreadForm.$setUntouched();
+                        $scope.moveRGBStripToEffectThreadForm.$setPristine();
+                    }
+                });
+            });
+            
+            $scope.isRGBStripActive=function(rgbStrip, activeRGBStrips) {
+                rval = false;
+                jQuery.each(
+                    activeRGBStrips, function() {
+                        if(this.index == rgbStrip.index){
+                            rval = true;
+                            return false;
+                        }
+                    });
+                return rval;
+            };
+
+            $scope.moveRGBStripToEffectThread = function(rgbStripIndex,effectThreadIndex){
+                socket.send(
+                    JSON.stringify({ 
+                        'moveRGBStripToEffectThread': { 
+                            'rgbStrip': rgbStripIndex, 
+                            'effectThread': effectThreadIndex
+                        }
+                    })
+                );
+            };
+
+            $scope.effectThreadChangeEffectParam = function(effectThreadIndex,params){
+                console.log(params)
+                socket.send(
+                    JSON.stringify({ 
+                        'effectThreadChangeEffectParam': { 
+                            'params': Object.entries(params), 
+                            'effectThread': effectThreadIndex
+                        }
+                    })
+                );
+            };
+
+            $scope.startEffect = function(effectIndex,rgbStrips,params){
+                console.log(params)
+                socket.send(
+                    JSON.stringify({
+                        'startEffect': {
+                            'rgbStrips': Object.entries(rgbStrips), 
+                            'effect': effectIndex,
+                            'params': Object.entries(params)
+                        }
+                    })
+                );
+            };
+
+            $scope.changeEffectThreadParameters = function(effectThreadIndex,paramIndex,values){
+
+            }
+            
+            //https://stackoverflow.com/questions/5623838/rgb-to-hex-and-hex-to-rgb
+            $scope.hexToRgb = function(hex) {
+                // Expand shorthand form (e.g. "03F") to full form (e.g. "0033FF")
+                var shorthandRegex = /^#?([a-f\d])([a-f\d])([a-f\d])$/i;
+                hex = hex.replace(shorthandRegex, function(m, r, g, b) {
+                    return r + r + g + g + b + b;
+                });
+
+                var result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+                return result ? {
+                    r: parseInt(result[1], 16),
+                    g: parseInt(result[2], 16),
+                    b: parseInt(result[3], 16)
+                } : null;
+            }
+
+            $scope.rgbToHex = function rgbToHex(r, g, b) {
+                return "#" + ((1 << 24) + (r << 16) + (g << 8) + b).toString(16).slice(1);
+            }
+        
+        }]);
+    </script>
+</body>
+</html>
