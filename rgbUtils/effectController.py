@@ -120,7 +120,10 @@ class effectController:
     # remove onControllerChangeHandler
     def removeOnControllerChangeHandler(self, hander):
         print("removeOnControllerChangeHandler", str(hander))
-        self.onControllerChangeHandler.remove(hander)
+        if hander in self.onControllerChangeHandler:
+            self.onControllerChangeHandler.remove(hander)
+        else:
+            print('\n\n -> client was never registered!')
 
     # automaticly loads all modules from effects subdir and adds them to the list of effects if they have the BaseEffect as subclass 
     def getEffectsListFromDir(self):
