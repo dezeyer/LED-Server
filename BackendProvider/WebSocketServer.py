@@ -1,8 +1,29 @@
+from BackendProvider.Helper.SimpleWebSocketServer import SimpleWebSocketServer, WebSocket
+from threading import Thread
+from functools import partial
+
+class ThreadedWebSocketServer(Thread):
+    def __init__(self,effectController,rgbStripController):
+        Thread.__init__(self)
+        self.effectController = effectController
+        self.rgbStripController = rgbStripController
+        self.daemon = True
+        self.stopped = False
+        self.start()
+    
+    def run(self):
+        server = SimpleWebSocketServer('', 8001, partial(HTTPWebSocketsHandler,self.effectController, self.rgbStripController))
+        while not self.stopped:
+            server.serveonce()
+        print("ThreadedWebSocketServer stopped")
+
+    def stop(self):
+        self.stopped = True
+
 import json
 
 from rgbUtils import effectControllerJsonHelper
 from rgbUtils import rgbStripControllerJsonHelper
-from webserver.SimpleWebSocketServer import WebSocket
 
 import traceback
 import logging
@@ -11,11 +32,6 @@ import logging
 CLIENT_TYPE_CONTROLLER = 0
 CLIENT_TYPE_STRIPE = 1
 CLIENT_TYPE_RECORDER = 2
-
-
-#class WebSocketError(Exception):
-#    pass
-
 
 class HTTPWebSocketsHandler(WebSocket):
 
@@ -39,7 +55,7 @@ class HTTPWebSocketsHandler(WebSocket):
                     self.client_type = CLIENT_TYPE_CONTROLLER
                     # add effectController onControllerChangeHandler to get changes in the effectController eg start/stop effects, parameter updates, moved strips
                     # register rgbStripController onRGBStripRegistered/UnRegistered handler to get noticed about new rgbStrips is not necessary
-                    # since we will get noticed from the effectController when it added the rgbStrip to the offEffect 
+                    # since we will get noticed from the effectController when it added the rgbStrip to the offEffect
                     self.effectController.addOnControllerChangeHandler(self.onChange)
                 # register new Stripes
                 elif int(data['register_client_type']) is CLIENT_TYPE_STRIPE and "client_name" in data:

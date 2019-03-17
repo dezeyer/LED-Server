@@ -8,7 +8,8 @@ def main():
     try:
 
         running = True
-        os.chdir(os.path.dirname(sys.argv[0]))
+        if(os.path.dirname(sys.argv[0]) is not ""):
+            os.chdir(os.path.dirname(sys.argv[0]))
 
         # i want some external providers the effects can interact with. for example the music reaction.
         # Idea is: eg a Pi with a soundcard processing input via pyaudio and sending this data to the server. an musicEffect is bind to this input and processing it.
@@ -35,12 +36,12 @@ def main():
         # or an other frontend / rgbStrip backend provider not using websockets. you could integrate alexa, phillips hue like lamps or whatever you like!
         # but then there must be some autoloading of modules in a folder like the effects for easy installing. //todo :)
         print("starting websocket:8001")
-        import webserver.WebSocketServer as WebSocketServer
+        import BackendProvider.WebSocketServer as WebSocketServer
         webSocketThread = WebSocketServer.ThreadedWebSocketServer(effectController,rgbStripController)
         
         print("starting UDPServer:8002")
         import BackendProvider.WemosStripUDPServer as UPDSocketServer
-        webSocketThread = UPDSocketServer.ThreadedUDPServer(effectController,rgbStripController)
+        udpSocketThread = UPDSocketServer.ThreadedUDPServer(effectController,rgbStripController)
 
         while running:
             time.sleep(1)
@@ -51,6 +52,7 @@ def main():
     finally:
         print('shutting down the LED-Server')
         webSocketThread.stop()
+        udpSocketThread.stop()
         effectController.stopAll()
 if __name__=='__main__':
     main()

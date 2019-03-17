@@ -39,7 +39,7 @@ class rgbStripController(threading.Thread):
     # remove onRGBStripRegisteredHandler
     def removeOnRGBStripRegisteredHandler(self, function):
         self.onRGBStripRegisteredHandler.remove(function)
-
+    
     # inform all onRGBStripUnRegisteredHandder about the removed RGBStrip
     def noticeRGBStripUnRegisteredHandler(self,rgbStrip):
         for hander in self.onRGBStripUnRegisteredHandler:

@@ -111,7 +111,8 @@ class UDPClient():
             self.rgbStripController.unregisterRGBStrip(self.rgbStrip)
         #print(self.client_address, 'closed')
 
-    # when a rgbStrip value is changed, send json data to client
+    # when a rgbStrip value is changed, send not json data but a formated string to client
+    # d:[id off the LED, always 0 on RGB strips]:[red value 0-255]:[green value 0-255]:[blue value 0-255]
     def onRGBStripValueUpdate(self,rgbStrip,led = 0):
         self.sendToClient('d:'+str(led)+':'+str(rgbStrip.red[led])+':'+str(rgbStrip.green[led])+':'+str(rgbStrip.blue[led])+'')
             
@@ -125,60 +126,3 @@ class UDPClient():
                 message.encode(), self.client_address
             )
         self.sendToClientLock = False
-
-# class UDPStripHandler:
-
-#     def __init__(self):
-#         #the rgbStrip object returned by the 
-#         self.rgbStrip = None
-#         # last ping command from the client
-#         self.lastPing = 0
-
-
-#     def handleMessage(self):
-#         try:
-#             print(self.address, self.data)
-#             data = json.loads(self.data)
-#             # Client Registration on the Websocket Server
-#             # maybe it would be better to use a websocket server thread for each client type,
-#             # can be done in future if there is too much latency
-#             if "register_client_type" in data:
-#                 # the controler type, add handler on RGBStripContoller and send the current state of the controller
-#                 if int(data['register_client_type']) is CLIENT_TYPE_CONTROLLER:
-#                     self.client_type = CLIENT_TYPE_CONTROLLER
-#                     # add effectController onControllerChangeHandler to get changes in the effectController eg start/stop effects, parameter updates, moved strips
-#                     # register rgbStripController onRGBStripRegistered/UnRegistered handler to get noticed about new rgbStrips is not necessary
-#                     # since we will get noticed from the effectController when it added the rgbStrip to the offEffect 
-#                     self.effectController.addOnControllerChangeHandler(self.onChange)
-#                 # register new Stripes
-#                 elif int(data['register_client_type']) is CLIENT_TYPE_STRIPE and "client_name" in data:
-#                     self.client_type = CLIENT_TYPE_STRIPE
-#                     # registers the strip with websocket object and name. the onRGBStripValueUpdate(rgbStrip) is called by 
-#                     # by the rgbStrip when an effectThread updates it
-#                     # the self.rgbStrip variable is used to unregister the strip only
-#                     self.rgbStrip = self.rgbStripController.registerRGBStrip(data["client_name"],self.onRGBStripValueUpdate)
-#                 # register new Audio Recorders
-#                 elif int(data['register_client_type']) is CLIENT_TYPE_RECORDER:
-#                     self.client_type = CLIENT_TYPE_RECORDER
-
-#             # controller responses are handled by the effectControllerJsonHandler
-#             if self.client_type is CLIENT_TYPE_CONTROLLER:
-#                 response = effectControllerJsonHandler.responseHandler(self.effectController, self.rgbStripController, data)
-#                 self.sendMessage(
-#                     json.dumps({
-#                         'response': response
-#                     })
-#                 )
-#                 return
-#             # the stripe should usualy not send any data, i do not know why it should...
-#             elif self.client_type is CLIENT_TYPE_STRIPE:
-#                 return
-#             # audio recorder responses are handled by the effectControllerJsonHandler
-#             elif self.client_type is CLIENT_TYPE_RECORDER:
-#                 return
-#         except Exception as e:
-#             print(e, traceback.format_exc())
-
-    
-
-        
