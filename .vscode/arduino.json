@@ -1,5 +1,0 @@
-{
-    "board": "arduino:avr:uno",
-    "port": "/dev/ttyUSB1",
-    "sketch": "ws2812b sketch/ws2812b_sketch.ino"
-}
