@@ -11,7 +11,7 @@
 
 node_modules
 clients/controller-html/old
-clients/strip-wemosd1-websocket/settings.example.h
+clients/strip-wemosd1-websocket/settings.h
 
 .directory
 
