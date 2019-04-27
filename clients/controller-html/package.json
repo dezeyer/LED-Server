@@ -1,0 +1,30 @@
+{
+  "name": "ledserver_html_controller",
+  "description": "HTML Websocket Controller for LED-Server",
+  "version": "1.0.0",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/dezeyer/LED-Server.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "angular": "1.7.8",
+    "angular-minicolors": "0.0.11",
+    "bootstrap-material-design": "4.1.1",
+    "jquery-minicolors": "2.1.10",
+    "jquery-wheelcolorpicker": "3.0.5",
+    "package.json": "^2.0.1",
+    "font-awesome": "4.7.0",
+    "reconnecting-websocket": "4.1.10",
+    "popper.js": "1.15.0",
+    "html5shiv.min.js": "3.7.2",
+    "respond.min.js": "1.4.2",
+    "bootstrap": "4.3.1"
+  }
+}

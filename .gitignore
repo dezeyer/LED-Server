@@ -9,6 +9,10 @@
 *.userosscache
 *.sln.docstates
 
+node_modules
+clients/controller-html/old
+clients/strip-wemosd1-websocket/settings.example.h
+
 .directory
 
 # User-specific files (MonoDevelop/Xamarin Studio)
