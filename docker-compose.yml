@@ -9,7 +9,7 @@ services:
     build: server
     ports:
       - "8001:8001"
-      - "8002:8002"
+      - "8002:8002/udp"
     image: ${USER}/ledserver
     user: "${UID}:${GID}"
     #volumes: 
