@@ -1,0 +1,16 @@
+version: '3'
+services:
+  web:
+    image: nginx
+    ports:
+      - "8080:80"
+    volumes:
+      - ./htdocs:/usr/share/nginx/html
+    user: "${UID}:${GID}"
+  python:
+    build: .
+    volumes: 
+      - ./:/usr/src/myapp
+    command: python3.7 /usr/src/myapp/LEDServer.py
+    
+  
