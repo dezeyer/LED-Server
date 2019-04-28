@@ -76,7 +76,7 @@ class RGBStrip:
             self.green[id] = int(green/100*brightness)
             self.blue[id] = int(blue/100*brightness)
 
-        self.onValuesUpdateHandler(self,id)
+        self.onValuesUpdateHandler(self)
             
     
     def off(self):

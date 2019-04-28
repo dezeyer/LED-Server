@@ -49,7 +49,7 @@ class HTTPWebSocketsHandler(WebSocket):
             # Client Registration on the Websocket Server
             # maybe it would be better to use a websocket server thread for each client type,
             # can be done in future if there is too much latency
-            if "register_client_type" in data:
+            if "register_client_type" in self.data:
                 # the controler type, add handler on RGBStripContoller and send the current state of the controller
                 if int(data['register_client_type']) is CLIENT_TYPE_CONTROLLER:
                     self.client_type = CLIENT_TYPE_CONTROLLER
@@ -60,10 +60,20 @@ class HTTPWebSocketsHandler(WebSocket):
                 # register new Stripes
                 elif int(data['register_client_type']) is CLIENT_TYPE_STRIPE and "client_name" in data:
                     self.client_type = CLIENT_TYPE_STRIPE
+                    ledcount=1
+                    if "led_count" in data:
+                        ledcount = int(data["led_count"])
+                    self.nojson=0
+                    if "nojson" in data:
+                        self.nojson = int(data["nojson"])
+                    self.nosend=0
+                    if "nosend" in data:
+                        self.nosend = int(data["nosend"])
+                    
                     # registers the strip with websocket object and name. the onRGBStripValueUpdate(rgbStrip) is called by 
                     # by the rgbStrip when an effectThread updates it
                     # the self.rgbStrip variable is used to unregister the strip only
-                    self.rgbStrip = self.rgbStripController.registerRGBStrip(data["client_name"],self.onRGBStripValueUpdate)
+                    self.rgbStrip = self.rgbStripController.registerRGBStrip(data["client_name"],self.onRGBStripValueUpdate,ledcount)
                 # register new Audio Recorders
                 elif int(data['register_client_type']) is CLIENT_TYPE_RECORDER:
                     self.client_type = CLIENT_TYPE_RECORDER
@@ -79,6 +89,11 @@ class HTTPWebSocketsHandler(WebSocket):
                 return
             # the stripe should usualy not send any data, i do not know why it should...
             elif self.client_type is CLIENT_TYPE_STRIPE:
+                if self.nosend == 1:
+                    respdata = "d"
+                    for i in range(self.rgbStrip.STRIP_LENGHT):
+                        respdata += ":" + str(i) + ":"+str(self.rgbStrip.red[i])+":"+str(self.rgbStrip.green[i])+":"+str(self.rgbStrip.blue[i])
+                    self.sendMessage(respdata)
                 return
             # audio recorder responses are handled by the effectControllerJsonHandler
             elif self.client_type is CLIENT_TYPE_RECORDER:
@@ -124,8 +139,15 @@ class HTTPWebSocketsHandler(WebSocket):
 
     # when a rgbStrip value is changed, send json data to client
     def onRGBStripValueUpdate(self,rgbStrip):
-        self.sendMessage(
-            json.dumps({
-                'data': rgbStripControllerJsonHelper.getRGBData(rgbStrip)
-            })
-        )
+        if self.nosend == 0:
+            if self.nojson == 0:
+                self.sendMessage(
+                    json.dumps({
+                        'data': rgbStripControllerJsonHelper.getRGBData(rgbStrip)
+                    })
+                )
+            if self.nojson == 1:
+                respdata = "d"
+                for i in range(rgbStrip.STRIP_LENGHT):
+                    respdata += ":" + str(i) + ":"+str(rgbStrip.red[i])+":"+str(rgbStrip.green[i])+":"+str(rgbStrip.blue[i])
+                self.sendMessage(respdata)

@@ -12,6 +12,9 @@
 node_modules
 clients/controller-html/old
 clients/strip-wemosd1-websocket/settings.h
+clients/strip-wemosd1-websocket/websocket.old
+
+.gitignore
 
 .directory
 

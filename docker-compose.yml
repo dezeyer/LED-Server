@@ -7,9 +7,10 @@ services:
     image: ${USER}/ledserver-controller-html
   ledserver:
     build: server
-    ports:
-      - "8001:8001"
-      - "8002:8002/udp"
+    #ports:
+    #  - "8001:8001"
+    #  - "8002:8002/udp"
+    network_mode: host #docker is changing the source port of the udp packages on the bridge
     image: ${USER}/ledserver
     user: "${UID}:${GID}"
     #volumes: 

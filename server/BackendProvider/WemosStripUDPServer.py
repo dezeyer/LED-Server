@@ -41,6 +41,7 @@ class ThreadedUDPServer(threading.Thread):
             while not self.stopped:
                 for key in list(UDPClients.keys()):
                     if UDPClients[key].lastping + 2 < time():
+                        print("ping missing, last ping: ",UDPClients[key].lastping," now is: ",time())
                         UDPClients[key].handleClose()
                         del UDPClients[key]
                 sleep(0.5)
@@ -75,6 +76,7 @@ class UDPClient():
         self.effectController = effectController
         self.rgbStripController = rgbStripController
         self.sendToClientLock = False
+        self.registered = False
         self.lastping = time()
 
     def handle(self, request):
@@ -85,27 +87,57 @@ class UDPClient():
         #print(time(),"clientdata -> ", clientdata)
         # socket.sendto(bytes("pong","utf-8"),self.client_address)
 
+        # Client Types:
+        # CLIENT_TYPE_CONTROLLER = 0
+        # CLIENT_TYPE_STRIPE = 1
+        # CLIENT_TYPE_RECORDER = 2
+
+        # UDP Registrierung Stripe: (nosend definiert, dass der stripe sich seine daten selbst anfordert)
+        # r:1:NUM_LEDS[:nosend]
+        # UDP Stripe sendet ping, woran festgemacht wird, ob er nocht lebt
+        # s:ping
+        # UDP
+
         try:
             data = clientdata.split(':')
-            # print(data)
+            print(data)
             # r:1:srg strip name
-            if data[0] == "r" and int(data[1]) == CLIENT_TYPE_STRIPE and data[2] != None:
+            if data[0] == "r" and int(data[1]) == CLIENT_TYPE_STRIPE and data[2] != None and self.registered is False:
+                self.registered = True
                 self.client_type = CLIENT_TYPE_STRIPE
                 # registers the strip with websocket object and name. the onRGBStripValueUpdate(rgbStrip) is called by
                 # by the rgbStrip when an effectThread updates it
                 # the self.rgbStrip variable is used to unregister the strip only
+
+                ledcount = 1
+                if data[3] != None:
+                    ledcount = int(data[3])
+
+                self.nosend = 0
+                if data[4] != None:
+                    self.nosend = int(data[4])
+
                 self.rgbStrip = self.rgbStripController.registerRGBStrip(
-                    data[2], self.onRGBStripValueUpdate)
+                    data[2], self.onRGBStripValueUpdate, ledcount)
             # s:ping
             if data[0] == "s" and data[1] == "ping":
                 # if we got a ping and the client has no client type defined, send status unregistered, so the client knows that he has to register
                 if self.client_type is None and self.socket is not None:
-                    self.sendToClient('s:unregistered')
+                    self.sendToClient('sr')
                 self.lastping = time()
             if data[0] == "u" and self.client_type == CLIENT_TYPE_STRIPE:
-                led = int(data[1])
-                self.sendToClient('d:'+str(led)+':'+str(self.rgbStrip.red[led])+':'+str(
-                    self.rgbStrip.green[led])+':'+str(self.rgbStrip.blue[led])+'')
+                #respdata = "d"
+                #for i in range(self.rgbStrip.STRIP_LENGHT):
+                #    respdata += ":" + str(i) + ":"+str(self.rgbStrip.red[i])+":"+str(self.rgbStrip.green[i])+":"+str(self.rgbStrip.blue[i])
+                #self.sendToClient(respdata)
+                for i in range(self.rgbStrip.STRIP_LENGHT):
+                    self.sendToClient("d"+
+                        "{0:03}".format(i) +
+                        "{0:03}".format(self.rgbStrip.red[i]) + 
+                        "{0:03}".format(self.rgbStrip.green[i]) +
+                        "{0:03}".format(self.rgbStrip.blue[i])
+                    )
+                #self.sendToClient('su')
         except Exception as e:
             print(e, traceback.format_exc())
 
@@ -117,21 +149,29 @@ class UDPClient():
     def handleClose(self):
         if self.client_type is CLIENT_TYPE_STRIPE:
             self.rgbStripController.unregisterRGBStrip(self.rgbStrip)
-        #print(self.client_address, 'closed')
+        print(self.client_address, 'closed')
 
     # when a rgbStrip value is changed, send not json data but a formated string to client
     # d:[id off the LED, always 0 on RGB strips]:[red value 0-255]:[green value 0-255]:[blue value 0-255]
-    def onRGBStripValueUpdate(self, rgbStrip, led=0):
-        return  # we send the update as requested, to prevent flooding the module
-        #self.sendToClient('d:'+str(led)+':'+str(rgbStrip.red[led])+':'+str(
-        #    rgbStrip.green[led])+':'+str(rgbStrip.blue[led])+'')
+    def onRGBStripValueUpdate(self, rgbStrip):
+        if self.nosend == 0:
+            respdata = "d"
+            tmplen = 0
+            for i in range(rgbStrip.STRIP_LENGHT):
+                if tmplen is 49:
+                    self.sendToClient(respdata)
+                    respdata = "d"
+                    tmplen = 0
+                respdata = respdata + "{0:03}".format(i) + "{0:03}".format(rgbStrip.red[i]) + "{0:03}".format(rgbStrip.green[i]) + "{0:03}".format(rgbStrip.blue[i])
+                #self.sendToClient("d"+"{0:03}".format(i) + "{0:03}".format(rgbStrip.red[i]) + "{0:03}".format(rgbStrip.green[i]) + "{0:03}".format(rgbStrip.blue[i]))
+                #self.sendToClient("d:"+ str(i) + ":"+str(rgbStrip.red[i])+":"+str(rgbStrip.green[i])+":"+str(rgbStrip.blue[i]))
+                #respdata += ":" + str(i) + ":"+str(rgbStrip.red[i])+":"+str(rgbStrip.green[i])+":"+str(rgbStrip.blue[i])
+                tmplen = tmplen+1
+            self.sendToClient(respdata)
+            self.sendToClient('su')
 
     def sendToClient(self, message):
-        while self.sendToClientLock is True:
-            sleep(1)
-        self.sendToClientLock = True
-        if self.socket is not None:
-            self.socket.sendto(
-                message.encode(), self.client_address
-            )
-        self.sendToClientLock = False
+        print("SendToClient:",self.client_address, message)
+        self.socket.sendto(
+            message.encode(), self.client_address
+        )
