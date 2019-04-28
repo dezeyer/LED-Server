@@ -10,13 +10,13 @@ class RGBStrip:
         # when updating, be sure it does not exist
         self.STRIP_UID = str(uuid.uuid4())
         self.STRIP_NAME = name
-        self.STRIP_LEGHT = lenght
+        self.STRIP_LENGHT = lenght
 
         self.onValuesUpdateHandler = onValuesUpdateHandler
 
-        self.red = [0]*self.STRIP_LEGHT
-        self.green = [0]*self.STRIP_LEGHT
-        self.blue = [0]*self.STRIP_LEGHT
+        self.red = [0]*self.STRIP_LENGHT
+        self.green = [0]*self.STRIP_LENGHT
+        self.blue = [0]*self.STRIP_LENGHT
     
     def RGB(self,red,green,blue,brightness = 100):
         
@@ -40,7 +40,7 @@ class RGBStrip:
         if(brightness > 100):
             brightness = 100
             
-        for x in range(self.STRIP_LEGHT):
+        for x in range(self.STRIP_LENGHT):
             self.red[x] = int(red/100*brightness)
             self.green[x] = int(green/100*brightness)
             self.blue[x] = int(blue/100*brightness)
@@ -48,8 +48,8 @@ class RGBStrip:
         self.onValuesUpdateHandler(self)
         
     def WS2812b(self,id,red,green,blue,brightness=100):
-        if id < 0 and id > self.STRIP_LEGHT:
-            print(self.STRIP_NAME," is max ",self.STRIP_LEGHT," Pixels long!")
+        if id < 0 and id > self.STRIP_LENGHT:
+            print(self.STRIP_NAME," is max ",self.STRIP_LENGHT," Pixels long!")
             return
         else:
             if(red < 0):
@@ -80,7 +80,7 @@ class RGBStrip:
             
     
     def off(self):
-        for x in range(self.STRIP_LEGHT):
+        for x in range(self.STRIP_LENGHT):
             self.red[x] = 0
             self.green[x] = 0
             self.blue[x] = 0
