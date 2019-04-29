@@ -7,9 +7,9 @@
 <body ng-app="stripApp" ng-controller="stripCtrl">
     {{data}}
     <div class="col-12" ng-repeat="led in data" style="border-style: solid;display: table">
-        <div ng-repeat="(key, value) in led"
-            style="width: 60px; height: 60px; background: {{key}}; display: table-cell;">
-            {{value}}
+        <div 
+            style="width: 60px; height: 60px; background: rgb({{led['red']}}, {{led['green']}}, {{led['blue']}}); display: table-cell;">
+            {{led["led"]}}
         </div>
     </div>
     <script src="node_modules/angular/angular.min.js"></script>
