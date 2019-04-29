@@ -45,7 +45,7 @@ class RGBStrip:
             self.green[x] = int(green/100*brightness)
             self.blue[x] = int(blue/100*brightness)
         
-        self.onValuesUpdateHandler(self)
+        self.show()
         
     def WS2812b(self,id,red,green,blue,brightness=100):
         if id < 0 and id > self.STRIP_LENGHT:
@@ -76,6 +76,7 @@ class RGBStrip:
             self.green[id] = int(green/100*brightness)
             self.blue[id] = int(blue/100*brightness)
 
+    def show(self):
         self.onValuesUpdateHandler(self)
             
     
