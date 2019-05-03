@@ -100,7 +100,7 @@ class UDPClient():
 
         try:
             data = clientdata.split(':')
-            print(data)
+            #print(data)
             # r:1:srg strip name
             if data[0] == "r" and int(data[1]) == CLIENT_TYPE_STRIPE and data[2] != None and self.registered is False:
                 self.registered = True
@@ -113,10 +113,6 @@ class UDPClient():
                 if data[3] != None:
                     ledcount = int(data[3])
 
-                self.nosend = 0
-                if data[4] != None:
-                    self.nosend = int(data[4])
-
                 self.rgbStrip = self.rgbStripController.registerRGBStrip(
                     data[2], self.onRGBStripValueUpdate, ledcount)
             # s:ping
@@ -125,19 +121,6 @@ class UDPClient():
                 if self.client_type is None and self.socket is not None:
                     self.sendToClient('sr')
                 self.lastping = time()
-            if data[0] == "u" and self.client_type == CLIENT_TYPE_STRIPE:
-                #respdata = "d"
-                #for i in range(self.rgbStrip.STRIP_LENGHT):
-                #    respdata += ":" + str(i) + ":"+str(self.rgbStrip.red[i])+":"+str(self.rgbStrip.green[i])+":"+str(self.rgbStrip.blue[i])
-                #self.sendToClient(respdata)
-                for i in range(self.rgbStrip.STRIP_LENGHT):
-                    self.sendToClient("d"+
-                        "{0:03}".format(i) +
-                        "{0:03}".format(self.rgbStrip.red[i]) + 
-                        "{0:03}".format(self.rgbStrip.green[i]) +
-                        "{0:03}".format(self.rgbStrip.blue[i])
-                    )
-                #self.sendToClient('su')
         except Exception as e:
             print(e, traceback.format_exc())
 
@@ -154,24 +137,20 @@ class UDPClient():
     # when a rgbStrip value is changed, send not json data but a formated string to client
     # d:[id off the LED, always 0 on RGB strips]:[red value 0-255]:[green value 0-255]:[blue value 0-255]
     def onRGBStripValueUpdate(self, rgbStrip):
-        if self.nosend == 0:
-            respdata = "d"
-            tmplen = 0
-            for i in range(rgbStrip.STRIP_LENGHT):
-                if tmplen is 49:
-                    self.sendToClient(respdata)
-                    respdata = "d"
-                    tmplen = 0
-                respdata = respdata + "{0:03}".format(i) + "{0:03}".format(rgbStrip.red[i]) + "{0:03}".format(rgbStrip.green[i]) + "{0:03}".format(rgbStrip.blue[i])
-                #self.sendToClient("d"+"{0:03}".format(i) + "{0:03}".format(rgbStrip.red[i]) + "{0:03}".format(rgbStrip.green[i]) + "{0:03}".format(rgbStrip.blue[i]))
-                #self.sendToClient("d:"+ str(i) + ":"+str(rgbStrip.red[i])+":"+str(rgbStrip.green[i])+":"+str(rgbStrip.blue[i]))
-                #respdata += ":" + str(i) + ":"+str(rgbStrip.red[i])+":"+str(rgbStrip.green[i])+":"+str(rgbStrip.blue[i])
-                tmplen = tmplen+1
-            self.sendToClient(respdata)
-            self.sendToClient('su')
+        respdata = "d"
+        tmplen = 0
+        for i in range(rgbStrip.STRIP_LENGHT):
+            if tmplen is 49:
+                self.sendToClient(respdata)
+                respdata = "d"
+                tmplen = 0
+            respdata = respdata + "{0:03}".format(i) + "{0:03}".format(rgbStrip.red[i]) + "{0:03}".format(rgbStrip.green[i]) + "{0:03}".format(rgbStrip.blue[i])
+            tmplen = tmplen+1
+        self.sendToClient(respdata)
+        self.sendToClient('su')
 
     def sendToClient(self, message):
-        print("SendToClient:",self.client_address, message)
+        #print("SendToClient:",self.client_address, message)
         self.socket.sendto(
             message.encode(), self.client_address
         )
