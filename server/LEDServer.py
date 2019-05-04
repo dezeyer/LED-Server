@@ -3,11 +3,11 @@ import os
 import sys
 import time
 import traceback
+import signal
 
 
 def main():
     try:
-
         running = True
         if(os.path.dirname(sys.argv[0]) is not ""):
             os.chdir(os.path.dirname(sys.argv[0]))
@@ -21,12 +21,18 @@ def main():
         # when there are new values for the strip
         from rgbUtils.rgbStripController import rgbStripController
         rgbStripController = rgbStripController()
-        rgbStripController.start()
+        #rgbStripController.start()
+
+        #signal.signal(signal.SIGINT, rgbStripController.stop())
+        #signal.signal(signal.SIGTERM, rgbStripController.stop())
 
         # the effectController handles the effects and pushes the values to the rgbStripContoller
         # it also calls the backendProvider's onChange function when there are changes made on the effects
         from rgbUtils.effectController import effectController
         effectController = effectController(rgbStripController)
+
+        #signal.signal(signal.SIGINT, effectController.stopAll())
+        #signal.signal(signal.SIGTERM, effectController.stopAll())
 
         # register effectControllers onRGBStripRegistered and onRGBStripUnregistered handler on the rgbStripContoller to detect added or removed strips
         rgbStripController.addOnRGBStripRegisteredHandler(
@@ -43,22 +49,37 @@ def main():
         webSocketThread = WebSocketProvider.ThreadedWebSocketServer(
             effectController, rgbStripController)
 
+        #signal.signal(signal.SIGINT, webSocketThread.stop())
+        #signal.signal(signal.SIGTERM, webSocketThread.stop())
+
         print("starting UPDSocketProvider:8002")
         import BackendProvider.UDPSocketProvider as UPDSocketProvider
         udpSocketThread = UPDSocketProvider.ThreadedUDPServer(
             effectController, rgbStripController)
+
+        #signal.signal(signal.SIGINT, udpSocketThread.stop())
+        #signal.signal(signal.SIGTERM, udpSocketThread.stop())
 
         while running:
             time.sleep(1)
 
     except Exception as e:
         running = False
-        print(e, traceback.format_exc())
+        print(e, traceback.format_exc()) 
     finally:
         print('shutting down the LED-Server')
-        webSocketThread.stop()
-        udpSocketThread.stop()
-        effectController.stopAll()
+        try:
+            webSocketThread.stop()
+        except:
+            pass
+        try:
+            udpSocketThread.stop()
+        except:
+            pass
+        try:
+            effectController.stopAll()
+        except:
+            pass
 
 
 if __name__ == '__main__':
