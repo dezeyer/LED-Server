@@ -34,6 +34,7 @@ class effectController:
         self.effectsList = self.getEffectsListFromDir()
         # start the offEffect by default
         self.offEffectThreadObject = self.startEffect(offEffect,[])
+        
         # - a bit of failover handling, remove dead threads from effectThread array
         # - move strips without an effect to the offEffect
         self.effectGuardian = self.effectGuardian(self)
@@ -156,9 +157,12 @@ class effectController:
                 self.effectThreads.remove(effectThread)
         self.noticeControllerChange()
 
+    # - a bit of failover handling, remove dead threads from effectThread array
+    # - move strips without an effect to the offEffect
     class effectGuardian(threading.Thread):
         def __init__(self, effectController):
-            threading.Thread.__init__(self)
+            threading.Thread.__init__(self, name='effectGuardian')
+            
             self.effectController = effectController
             self.stopped = False
 

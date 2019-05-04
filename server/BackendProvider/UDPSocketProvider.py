@@ -9,7 +9,7 @@ import struct
 
 class ThreadedUDPServer(threading.Thread):
     def __init__(self, effectController, rgbStripController):
-        threading.Thread.__init__(self)
+        threading.Thread.__init__(self, name="ThreadedUDPServer")
         self.effectController = effectController
         self.rgbStripController = rgbStripController
         self.daemon = True
@@ -34,7 +34,7 @@ class ThreadedUDPServer(threading.Thread):
     # when there is no answer after 2 seconds
     class UDPClientGuardian(threading.Thread):
         def __init__(self):
-            threading.Thread.__init__(self)
+            threading.Thread.__init__(self,name="UDPClientGuardian")
             self.stopped = False
 
         def run(self):
@@ -96,7 +96,7 @@ class UDPClient():
         # r:1:NUM_LEDS[:nosend]
         # UDP Stripe sendet ping, woran festgemacht wird, ob er nocht lebt
         # s:ping
-        # UDP
+        # UDP 
 
         try:
             data = clientdata.split(':')

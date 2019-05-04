@@ -39,13 +39,13 @@ def main():
         # or an other frontend / rgbStrip backend provider not using websockets. you could integrate alexa, phillips hue like lamps or whatever you like!
         # but then there must be some autoloading of modules in a folder like the effects for easy installing. //todo :)
         print("starting websocket:8001")
-        import BackendProvider.WebSocketServer as WebSocketServer
-        webSocketThread = WebSocketServer.ThreadedWebSocketServer(
+        import BackendProvider.WebSocketProvider as WebSocketProvider
+        webSocketThread = WebSocketProvider.ThreadedWebSocketServer(
             effectController, rgbStripController)
 
-        print("starting UDPServer:8002")
-        import BackendProvider.WemosStripUDPServer as UPDSocketServer
-        udpSocketThread = UPDSocketServer.ThreadedUDPServer(
+        print("starting UPDSocketProvider:8002")
+        import BackendProvider.UDPSocketProvider as UPDSocketProvider
+        udpSocketThread = UPDSocketProvider.ThreadedUDPServer(
             effectController, rgbStripController)
 
         while running:

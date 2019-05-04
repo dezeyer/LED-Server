@@ -4,7 +4,7 @@ from functools import partial
 
 class ThreadedWebSocketServer(Thread):
     def __init__(self,effectController,rgbStripController):
-        Thread.__init__(self)
+        Thread.__init__(self,name="WebSocketServer")
         self.effectController = effectController
         self.rgbStripController = rgbStripController
         self.daemon = True
