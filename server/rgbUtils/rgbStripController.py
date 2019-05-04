@@ -2,9 +2,9 @@ from rgbUtils.RGBStrip import RGBStrip
 import time
 import threading
 import json
-class rgbStripController(threading.Thread):
+class rgbStripController():
     def __init__(self):
-        threading.Thread.__init__(self)
+        #threading.Thread.__init__(self)
         self.rgbStrips = []
         self.onRGBStripRegisteredHandler = []
         self.onRGBStripUnRegisteredHandler = []
