@@ -2,11 +2,11 @@
 docker run \
     --rm \
     -i \
-    --network=host \
+    --network="host" \
     -v "$HOME":"$HOME":ro \
     -u $(id -u) \
     -w "$PWD" \
-    $USER/ledserver:latest \
-    python3.7 $@
+    devel:latest \
+    python3.7 -u $@
 
 exit $?
