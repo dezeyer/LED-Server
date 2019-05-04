@@ -5,6 +5,10 @@ services:
     ports:
       - "8080:80"
     image: ledserver-controller-html
+  rpi_udp_client:
+    build: clients/strip-rpi-udp
+    #ports:
+    image: rpi-udp-client
   ledserver:
     build: server
     #ports:
@@ -16,5 +20,8 @@ services:
     #volumes: 
     #  - ./server:/usr/src/server
     #command: python3.7 /usr/src/server/LEDServer.py
+  devel:
+    build: .
+    image: devel
     
   
