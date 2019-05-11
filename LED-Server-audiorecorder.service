@@ -1,0 +1,16 @@
+[Unit]
+Description=LED-Server audiorecorder
+After=syslog.target
+
+[Service]
+Type=simple
+WorkingDirectory=/opt/LED-Server/clients/audiorecorder-pulse-udp/
+ExecStart=/opt/LED-Server/clients/audiorecorder-pulse-udp/audiorecorder.py
+SyslogIdentifier=led-server-audiorecorder
+StandardOutput=syslog
+StandardError=syslog
+Restart=always
+RestartSec=3
+
+[Install]
+WantedBy=multi-user.target
