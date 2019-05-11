@@ -78,6 +78,10 @@ class UDPClient():
         self.rgbStripController = rgbStripController
         self.sendToClientLock = False
         self.registered = False
+
+        #Recorder related
+        self.xs: typing.List[float] = []
+        self.ys: typing.List[float] = []
         self.lastping = time()
 
     def handle(self, request):
@@ -116,12 +120,37 @@ class UDPClient():
 
                 self.rgbStrip = self.rgbStripController.registerRGBStrip(
                     data[2], self.onRGBStripValueUpdate, ledcount)
+            
+            if data[0] == "r" and int(data[1]) == CLIENT_TYPE_RECORDER and data[2] != None and self.registered is False:
+                self.registered = True
+                self.client_type = CLIENT_TYPE_RECORDER
+                print("RECORDER CONNECTED")
+                ''' TODO a recorderController to register the Controller
+                self.rgbStrip = self.rgbStripController.registerRGBStrip(
+                    data[2], self.onRGBStripValueUpdate, ledcount)'''
             # s:ping
             if data[0] == "s" and data[1] == "ping":
                 # if we got a ping and the client has no client type defined, send status unregistered, so the client knows that he has to register
                 if self.client_type is None and self.socket is not None:
                     self.sendToClient('sr')
                 self.lastping = time()
+            if self.client_type == CLIENT_TYPE_RECORDER:
+                if data[0] == "dlen":
+                    #print(data)
+                    self.xs = [0]*int(data[1])
+                    self.ys = [0]*int(data[2])
+                if data[0] == "d" and data[1] == "xs" and self.xs.__len__ != 0:
+                    for item in data[2:]:
+                        index,val = item.split("|")
+                        self.xs[int(index)] = float(val)
+                if data[0] == "d" and data[1] == "ys" and self.ys.__len__ != 0:
+                    for item in data[2:]:
+                        index,val = item.split("|")
+                        self.ys[int(index)] = float(val)
+
+                if data[0] == "d" and data[1] == "c":
+                    #print([self.xs,self.ys])
+                    self.effectController.updateFttValues((self.xs,self.ys))
         except Exception as e:
             print(e, traceback.format_exc())
 
