@@ -19,6 +19,7 @@ class ThreadedUDPServer(threading.Thread):
         self.udpClientGuardian.start()
         UDPClients
 
+
     def run(self):
         self.server = socketserver.UDPServer(('', 8002), UDPStripHandler)
         self.server.effectController = self.effectController
