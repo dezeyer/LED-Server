@@ -1,0 +1,3 @@
+# run on host to allow Xorg access from devel container
+xhost local:
+
