@@ -1,21 +1,26 @@
 import time
 import threading
+import typing
 import copy
-from rgbUtils.debug import debug
 
 class BaseEffect(threading.Thread):
 
     # The Name and the Description of the Effect, 
     # should be overwritten by the inheritancing Effect
-    name = "Undefined"
-    desc = "No Description"
+    name: str = "Undefined"
+    desc: str = "No Description"
 
     # Something that will be used to show descriptions and value options 
     # of the parameters the effect will accept, in a way, that eg the webclient can decide, 
     # if the parameters can be toggeled by a button/checkbox/slider/whatever
-    effectParameters = []
+    effectParameters: list = []
 
-    stop = False
+    # musiceffect things 
+    # TODO we need a recorderController where the effect binds to and gets its values, this is shit...
+    hasNewFttValues = False
+    ftt: typing.Tuple[typing.List[float],typing.List[float]] = ([],[])
+
+    stop:bool = False
 
     def __init__(self):
         threading.Thread.__init__(self)
@@ -48,7 +53,7 @@ class BaseEffect(threading.Thread):
     # to avoid two effects accessing the rgbStrip
     def effect(self):
         while 1:
-            debug("ET "+self.name+" effect() function needs to be replaced in inheritancing Effect")
+            print("ET "+self.name+" effect() function needs to be replaced in inheritancing Effect")
 
     # called when the effect is stopped
     def end(self):
@@ -74,6 +79,10 @@ class BaseEffect(threading.Thread):
     # for overriding by the effect, when a strip is added
     def onEffectParameterValuesUpdated(self):
         return
+
+    def updateFttValues(self,ftt: typing.Tuple[typing.List[float],typing.List[float]]):
+        self.hasNewFttValues = True
+        self.ftt = ftt
 
     # returns a list of the RGBStrips used by this effect
     def effectRGBStrips(self):

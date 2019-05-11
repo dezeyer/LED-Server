@@ -1,9 +1,8 @@
-from rgbUtils.BaseEffect import BaseEffect
-from rgbUtils.debug import debug
+from Utils.BaseEffect import BaseEffect
 from random import randint
 import time
 
-class strobeEffect(BaseEffect):
+class StrobeEffect(BaseEffect):
     name = "strobeEffect"
     desc = "*Strobe*"
 

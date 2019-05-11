@@ -1,15 +1,13 @@
-from rgbUtils.BaseEffect import BaseEffect
-from rgbUtils.EffectParameter import slider, colorpicker
-from rgbUtils.debug import debug
+from Utils.BaseEffect import BaseEffect
+from Utils.EffectParameter import slider, colorpicker
 import time
 
 import sys
 import numpy
-from rgbUtils.pyAudioRecorder import pyAudioRecorder
 from time import perf_counter, sleep
 from random import randint, shuffle
 
-class musikEffect(BaseEffect):
+class MusikEffect(BaseEffect):
     name = "musikEffect"
     desc = "LED-Band *sollte* nach musik blinken"
     
@@ -18,7 +16,7 @@ class musikEffect(BaseEffect):
     # Something that will be used to show descriptions and value options 
     # of the parameters the effect will accept, in a way, that eg the webclient can decide, 
     # if the parameters can be toggeled by a button/checkbox/slider/whatever
-    effectParameters = [
+    effectParameters: list = [
     #     radio(\   
     #         "Shuffle LED to Freq Order",\
     #         "Off -> Mapping  ",\
@@ -42,11 +40,13 @@ class musikEffect(BaseEffect):
         self.fft_random_keys = [0,1,2,3]
         self.fft_random = [0,0,0,0]
 
+        self.y_max_freq_avg_list = []
+        self.low_freq_avg_list = []
+        self.bpm_list = []
+        self.prev_beat = 0 # timestamp
+
         # used by strobe() 
         self.lastmode = 0
-
-        self.recorderClient = pyAudioRecorder.recorderClient()
-        self.rgbStripController.pyAudioRecorder.registerRecorderClient(self.recorderClient)
 
         return
 
@@ -67,17 +67,17 @@ class musikEffect(BaseEffect):
         #        b=0
         #    RGBStrip.RGB(r,g,b)
         #self.lastTime = time.time()
-        sleep(.001)
+        sleep(0.00833333333)
 
     def end(self):
-       self.rgbStripController.pyAudioRecorder.unregisterRecorderClient(self.recorderClient)
+        pass
 
     def plot_audio_and_detect_beats(self):
-        if not self.rgbStripController.pyAudioRecorder.has_new_audio: 
+        if not self.hasNewFttValues: 
             return
 
         # get x and y values from FFT
-        xs, ys = self.rgbStripController.pyAudioRecorder.fft()
+        xs, ys = self.ftt
 
         # calculate average for all frequency ranges
         y_avg = numpy.mean(ys)
@@ -88,9 +88,9 @@ class musikEffect(BaseEffect):
         #mid_freq = numpy.mean(ys[88:115])
         #hig_freq = numpy.mean(ys[156:184])
         
-        low_freq = numpy.mean(ys[0:67])
-        mid_freq = numpy.mean(ys[68:135])
-        hig_freq = numpy.mean(ys[136:204])
+        low_freq = numpy.mean(ys[0:int(ys.__len__() / 3 * 1)])
+        mid_freq = numpy.mean(ys[int(ys.__len__() / 3 * 1):int(ys.__len__() / 3 * 2)])
+        hig_freq = numpy.mean(ys[int(ys.__len__() / 3 * 2):int(ys.__len__() / 3 * 3)])
         
         #get the maximum of all freq
         if len(self.y_max_freq_avg_list) < 250 or y_avg > 10 and numpy.amax([low_freq,mid_freq,hig_freq])/2 > numpy.amin(self.y_max_freq_avg_list):
@@ -166,6 +166,16 @@ class musikEffect(BaseEffect):
                     self.fft_random[1],
                     self.fft_random[2]
                 )
+            """
+            rgbStrip: RGBStrip
+            for rgbStrip in self.effectRGBStrips():
+                for i in range(rgbStrip.STRIP_LENGHT):
+                    if rgbStrip.STRIP_LENGHT-1-10 is not i:
+                        rgbStrip.WS2812b(rgbStrip.STRIP_LENGHT-i-1, rgbStrip.red[rgbStrip.STRIP_LENGHT-i-2], rgbStrip.green[rgbStrip.STRIP_LENGHT-i-2], rgbStrip.blue[rgbStrip.STRIP_LENGHT-i-2])
+                    else:
+                        rgbStrip.WS2812b(rgbStrip.STRIP_LENGHT-i-1, self.fft_random[0], self.fft_random[1], self.fft_random[2])
+                rgbStrip.show()
+            """
         
         # shorten the cumulative list to account for changes in dynamics
         if len(self.low_freq_avg_list) > 500:
@@ -187,8 +197,7 @@ class musikEffect(BaseEffect):
             self.low_freq_avg_list = []
             print("new song")
             self.off()
-
-        self.rgbStripController.pyAudioRecorder.newAudio = False
+        self.hasNewFttValues = False
         # print(self.bpm_list)250
 
     def strobe(self):

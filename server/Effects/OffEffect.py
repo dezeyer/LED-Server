@@ -1,9 +1,8 @@
-from rgbUtils.BaseEffect import BaseEffect
-from rgbUtils.debug import debug
+from Utils.BaseEffect import BaseEffect
 
 import time
 
-class offEffect(BaseEffect):
+class OffEffect(BaseEffect):
     name = "offEffect"
     desc = "LED-Band *sollte* nicht an sein"
 

@@ -1,15 +1,20 @@
-from rgbUtils.RGBStrip import RGBStrip
+from Utils.RGBStrip import RGBStrip
 import time
 import threading
 import json
-class rgbStripController():
+class RGBStripController:
+    '''
+    rgbStrips register themselves at the rgbStripContoller
+    the rgbStripController calls the backend Provider's onChange function
+    when there are new values for the strip
+    '''
     def __init__(self):
         #threading.Thread.__init__(self)
         self.rgbStrips = []
         self.onRGBStripRegisteredHandler = []
         self.onRGBStripUnRegisteredHandler = []
 
-    def registerRGBStrip(self,rgbStripName,onValuesUpdateHandler,ledcount=1):
+    def registerRGBStrip(self,rgbStripName: str,onValuesUpdateHandler: object,ledcount=1):
         # maybe we can use an unique id if the strip reconnects later, eg push the uid
         # to the client on first connect and if he reconnects he sould send it back again.
         # the wmos could use the mac adress, if there is a python script it can save the uid

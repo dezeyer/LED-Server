@@ -1,8 +1,7 @@
-from rgbUtils.BaseEffect import BaseEffect
-from rgbUtils.debug import debug
+from Utils.BaseEffect import BaseEffect
 import time
 
-class rainbowEffect(BaseEffect):
+class RainbowEffect(BaseEffect):
     name = "rainbowEffect"
     desc = "LED-Band *sollte* rainbowEffect sein"
 
@@ -13,7 +12,6 @@ class rainbowEffect(BaseEffect):
 
     #loop effect as long as not stopped
     def effect(self):
-        debug(self)
         """Draw rainbow that fades across all pixels at once."""
         for j in range(256*75):
             for rgbStrip in self.effectRGBStrips():

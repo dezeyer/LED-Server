@@ -1,16 +1,19 @@
-from rgbUtils.debug import debug
 import uuid
+import typing
 
 class RGBStrip:
     # name = the name off the the strip, defined by the client connecting to the server
     # uid = unique id, if the strip sends one, use this (later maybe, or never, whatever)
     # lenght = the lenght off the strip, for future use of eg WS2812b strips, will be 1 by default
-    def __init__(self,name,onValuesUpdateHandler,lenght=1):
+    STRIP_NAME: str
+    STRIP_LENGHT: int
+    def __init__(self,name: str,onValuesUpdateHandler: object,lenght: int=1,address: typing.Tuple[str,int] = ("0.0.0.0",0000)):
         # UID should be updateable later, or not?
         # when updating, be sure it does not exist
         self.STRIP_UID = str(uuid.uuid4())
         self.STRIP_NAME = name
         self.STRIP_LENGHT = lenght
+        self.address = address
 
         self.onValuesUpdateHandler = onValuesUpdateHandler
 
@@ -18,7 +21,7 @@ class RGBStrip:
         self.green = [0]*self.STRIP_LENGHT
         self.blue = [0]*self.STRIP_LENGHT
     
-    def RGB(self,red,green,blue,brightness = 100):
+    def RGB(self,red: int,green: int,blue: int,brightness: int = 100):
         
         if(red < 0):
             red = 0
@@ -89,7 +92,6 @@ class RGBStrip:
         self.onValuesUpdateHandler(self)
 
     def getData(self):
-        self.hasNewData = False
         return [self.red,self.green,self.blue]
 
 

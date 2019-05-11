@@ -22,8 +22,8 @@ class ThreadedWebSocketServer(Thread):
 
 import json
 
-from rgbUtils import effectControllerJsonHelper
-from rgbUtils import rgbStripControllerJsonHelper
+from BackendProvider.Helper import effectControllerJsonHelper
+from BackendProvider.Helper import rgbStripControllerJsonHelper
 
 import traceback
 import logging
@@ -63,12 +63,6 @@ class HTTPWebSocketsHandler(WebSocket):
                     ledcount=1
                     if "led_count" in data:
                         ledcount = int(data["led_count"])
-                    self.nojson=0
-                    if "nojson" in data:
-                        self.nojson = int(data["nojson"])
-                    self.nosend=0
-                    if "nosend" in data:
-                        self.nosend = int(data["nosend"])
                     
                     # registers the strip with websocket object and name. the onRGBStripValueUpdate(rgbStrip) is called by 
                     # by the rgbStrip when an effectThread updates it
@@ -87,13 +81,9 @@ class HTTPWebSocketsHandler(WebSocket):
                     })
                 )
                 return
+
             # the stripe should usualy not send any data, i do not know why it should...
             elif self.client_type is CLIENT_TYPE_STRIPE:
-                if self.nosend == 1:
-                    respdata = "d"
-                    for i in range(self.rgbStrip.STRIP_LENGHT):
-                        respdata += ":" + str(i) + ":"+str(self.rgbStrip.red[i])+":"+str(self.rgbStrip.green[i])+":"+str(self.rgbStrip.blue[i])
-                    self.sendMessage(respdata)
                 return
             # audio recorder responses are handled by the effectControllerJsonHandler
             elif self.client_type is CLIENT_TYPE_RECORDER:
@@ -139,15 +129,8 @@ class HTTPWebSocketsHandler(WebSocket):
 
     # when a rgbStrip value is changed, send json data to client
     def onRGBStripValueUpdate(self,rgbStrip):
-        if self.nosend == 0:
-            if self.nojson == 0:
-                self.sendMessage(
-                    json.dumps({
-                        'data': rgbStripControllerJsonHelper.getRGBData(rgbStrip)
-                    })
-                )
-            if self.nojson == 1:
-                respdata = "d"
-                for i in range(rgbStrip.STRIP_LENGHT):
-                    respdata += ":" + str(i) + ":"+str(rgbStrip.red[i])+":"+str(rgbStrip.green[i])+":"+str(rgbStrip.blue[i])
-                self.sendMessage(respdata)
+        self.sendMessage(
+            json.dumps({
+                'data': rgbStripControllerJsonHelper.getRGBData(rgbStrip)
+            })
+        )

@@ -1,9 +1,8 @@
-from rgbUtils.BaseEffect import BaseEffect
-from rgbUtils.EffectParameter import slider, colorpicker
-from rgbUtils.debug import debug
+from Utils.BaseEffect import BaseEffect
+from Utils.EffectParameter import slider, colorpicker
 import time
 
-class onEffect(BaseEffect):
+class OnEffect(BaseEffect):
     name = "onEffect"
     desc = "LED-Band *sollte* an sein"
     

@@ -11,14 +11,13 @@
 
 
 import numpy
-import scipy
 import pyaudio
 import threading
 
 import time
 
 
-class pyAudioRecorder:
+class PyAudioRecorder:
     """Simple, cross-platform class to record from the default input device."""
 
     def __init__(self):

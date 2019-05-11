@@ -18,7 +18,6 @@ class ThreadedUDPServer(threading.Thread):
         self.start()
         self.udpClientGuardian = self.UDPClientGuardian()
         self.udpClientGuardian.start()
-        UDPClients
 
 
     def run(self):
@@ -86,13 +85,6 @@ class UDPClient():
         self.lastping = time()
 
     def handle(self, request):
-
-        clientdata = request[0].decode()
-        self.socket = request[1]
-        #print(time(),"{} wrote:".format(self.client_address))
-        #print(time(),"clientdata -> ", clientdata)
-        # socket.sendto(bytes("pong","utf-8"),self.client_address)
-
         # Client Types:
         # CLIENT_TYPE_CONTROLLER = 0
         # CLIENT_TYPE_STRIPE = 1
@@ -104,8 +96,9 @@ class UDPClient():
         # s:ping
         # UDP 
 
+        self.socket = request[1]
         try:
-            data = clientdata.split(':')
+            data = request[0].decode().split(':')
             #print(data)
             # r:1:srg strip name
             if data[0] == "r" and int(data[1]) == CLIENT_TYPE_STRIPE and data[2] != None and self.registered is False:

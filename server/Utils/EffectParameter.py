@@ -1,6 +1,6 @@
 import threading
 
-class effectParameter(object):
+class EffectParameter(object):
     # The Name and the Description of the EffectParameter, 
     # should be overwritten by the inheritancing EffectParameter
     name="Undefined"
@@ -12,7 +12,7 @@ class effectParameter(object):
     #   [min/off,max/on,current,"description"],
     #   [min/off,max/on,current,"description"],
     # ]
-    options = []
+    options: list = []
 
     def __init__(self,name,desc,initOptions = []):
         self.name = name
@@ -27,7 +27,7 @@ class effectParameter(object):
         else:
             return False
 
-class colorpicker(effectParameter):
+class colorpicker(EffectParameter):
     name="UndefinedColorpicker"
     desc="No Description"
     type="colorpicker"
@@ -36,7 +36,7 @@ class colorpicker(effectParameter):
     def testValue(self,index,value):
         return True
 
-class slider(effectParameter):
+class slider(EffectParameter):
     name="UndefinedSlider"
     desc="No Description"
     type="slider"
