@@ -1,27 +1,49 @@
-version: '3'
+version: '3.1'
 services:
   ledserver-controller-html:
     build: clients/controller-html
     ports:
       - "8080:80"
-    image: ledserver-controller-html
-  rpi_udp_client:
-    build: clients/strip-rpi-udp
-    #ports:
-    image: rpi-udp-client
-  ledserver:
-    build: server
+    image: ledserver_controller-html
+  #rpi_udp_client:
+  #  build: clients/strip-rpi-udp
+  #  #ports:
+  #  image: ledserver_rpi-udp-client
+  #ledserver:
+  #  build: server
+  #  #ports:
+  #  #  - "8001:8001"
+  #  #  - "8002:8002/udp"
+  #  network_mode: host #docker is changing the source port of the udp packages on the bridge
+  #  image: ledserver_server
+  #  #user: "${UID}:${GID}"
+  #  #volumes: 
+  #  #  - ./server:/usr/src/server
+  #  #command: python3.7 /usr/src/server/LEDServer.py
+  python-devel:
+    build: .
+    image: ledserver_python-devel
     #ports:
     #  - "8001:8001"
     #  - "8002:8002/udp"
+    #  - "4832:34567"
     network_mode: host #docker is changing the source port of the udp packages on the bridge
-    image: ledserver
-    #user: "${UID}:${GID}"
-    #volumes: 
-    #  - ./server:/usr/src/server
-    #command: python3.7 /usr/src/server/LEDServer.py
-  devel:
-    build: .
-    image: devel
+    volumes: 
+      - ./:/app
+      - /tmp/.X11-unix:/tmp/.X11-unix
+    secrets:
+      - host_ssh_key
+      - host_ssh_known_hosts
+      - host_ssh_config
+    environment:
+      - DISPLAY=unix:0
+
+secrets:
+  host_ssh_key:
+    file: ~/.ssh/id_rsa
+  host_ssh_known_hosts:
+    file: ~/.ssh/known_hosts
+  host_ssh_config:
+    file: ~/.ssh/config
     
   
