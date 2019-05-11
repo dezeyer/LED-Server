@@ -8,7 +8,7 @@ import signal
 
 def main():
     try:
-        running = True
+        running: bool = True
         if(os.path.dirname(sys.argv[0]) is not ""):
             os.chdir(os.path.dirname(sys.argv[0]))
 
@@ -16,29 +16,27 @@ def main():
         # Idea is: eg a Pi with a soundcard processing input via pyaudio and sending this data to the server. an musicEffect is bind to this input and processing it.
         # to be as flexible as possible the client registers with a name(sting), a type(string) and the data as an dict. the effect filters these clients by type. jea?
 
-        # rgbStrips register themselves at the rgbStripContoller
-        # the rgbStripController calls the backend Provider's onChange function
-        # when there are new values for the strip
-        from rgbUtils.rgbStripController import rgbStripController
-        rgbStripController = rgbStripController()
-        #rgbStripController.start()
+        
+        from Utils.RGBStripController import RGBStripController
+        rgbStripController: RGBStripController = RGBStripController()
 
         #signal.signal(signal.SIGINT, rgbStripController.stop())
         #signal.signal(signal.SIGTERM, rgbStripController.stop())
 
-        # the effectController handles the effects and pushes the values to the rgbStripContoller
-        # it also calls the backendProvider's onChange function when there are changes made on the effects
-        from rgbUtils.effectController import effectController
-        effectController = effectController(rgbStripController)
+        
+        from Utils.EffectController import EffectController
+        effectController: EffectController = EffectController(rgbStripController)
 
         #signal.signal(signal.SIGINT, effectController.stopAll())
         #signal.signal(signal.SIGTERM, effectController.stopAll())
 
         # register effectControllers onRGBStripRegistered and onRGBStripUnregistered handler on the rgbStripContoller to detect added or removed strips
         rgbStripController.addOnRGBStripRegisteredHandler(
-            effectController.onRGBStripRegistered)
+            effectController.onRGBStripRegistered
+        )
         rgbStripController.addOnRGBStripUnRegisteredHandler(
-            effectController.onRGBStripUnRegistered)
+            effectController.onRGBStripUnRegistered
+        )
 
         # this is a "Backend Provider" that interacts with the effectController and also the rgbStripContoller (via effectController)
         # this could be seperated in one websocket server for the frontend and one for the rgbStrips
