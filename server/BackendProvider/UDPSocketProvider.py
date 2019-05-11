@@ -55,7 +55,7 @@ CLIENT_TYPE_CONTROLLER = 0
 CLIENT_TYPE_STRIPE = 1
 CLIENT_TYPE_RECORDER = 2
 
-UDPClients = {}
+UDPClients: dict = {}
 
 
 class UDPStripHandler(socketserver.BaseRequestHandler):
