@@ -30,6 +30,7 @@ void setup() {
   FastLED.setMaxPowerInVoltsAndMilliamps(5, MILLI_AMPS);
   fill_solid(leds, NUM_LEDS, CRGB::Black);
   wdt_enable(WDTO_4S);   // Watchdog auf 4 s stellen
+  WiFi.softAPdisconnect (true);
   FastLED.show();
   Udp.begin(random(5000,5500));
   

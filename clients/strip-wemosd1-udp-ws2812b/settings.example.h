@@ -6,6 +6,8 @@
 #define MILLI_AMPS         2000 // IMPORTANT: set the max milli-Amps of your power supply (4A = 4000mA)
 #define FRAMES_PER_SECOND  120  // here you can control the speed. With the Access Point / Web Server the animations run a bit slower.
 
+String StripName = "Egon";
+
 const char* ssid     = "none";
 const char* password = "none";
 
