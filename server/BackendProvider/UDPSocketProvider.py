@@ -156,10 +156,7 @@ class UDPClient():
             print(e, traceback.format_exc())
 
     # unregister the onChangeHandler
-    # for now this function is not called when a client times out,
-    # so they don't get unregistered. i mean there is no function that
-    # is called when a client times out.
-
+    # for now this function is not called when a client times out
     def handleClose(self):
         if self.client_type is CLIENT_TYPE_STRIPE:
             self.rgbStripController.unregisterRGBStrip(self.rgbStrip)
