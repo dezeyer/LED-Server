@@ -18,9 +18,10 @@ RUN pip3 install --no-cache-dir RPi.GPIO
 RUN pip3 install git+https://github.com/GeorgeFilipkin/pulsemixer.git
 ENV UNAME pacat
 
-RUN apt-get update \
- && DEBIAN_FRONTEND=noninteractive apt-get install --yes pulseaudio
-RUN DEBIAN_FRONTEND=noninteractive apt-get install --yes alsa-utils
+RUN DEBIAN_FRONTEND=noninteractive apt-get update --yes \
+ && DEBIAN_FRONTEND=noninteractive apt-get upgrade --yes \
+ &&  DEBIAN_FRONTEND=noninteractive apt-get install --yes pulseaudio \
+ && DEBIAN_FRONTEND=noninteractive apt-get install --yes alsa-utils
 RUN adduser root audio
 RUN adduser root pulse-access
  
